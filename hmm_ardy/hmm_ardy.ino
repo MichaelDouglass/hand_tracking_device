@@ -1,5 +1,13 @@
-float read;
-float volts;
+#include "states.h"
+#include "leds.h"
+#include "hand.h"
+#include "button.h"
+
+LEDS leds;
+Button button;
+Hand hand;
+
+bool open_close;
 
 void setup()
 {
@@ -8,18 +16,12 @@ void setup()
 
 void loop()
 {
-  read = analogRead(A0);
-  volts = read * 5.0 / 1023;
-  Serial.print("Voltage: ");
-  Serial.print(volts);
-  Serial.print(" || ");
-  if (volts > 1.1)
-  {
-    Serial.println("Open!");
-  }
-  else
-  {
-    Serial.println("Closed!");
-  }
-  delay(100);
+  open_close = hand.read_oc();
+  Serial.println(open_close);
+  leds.set_ctl(ON);
+  leds.ctl_LED();
+  delay(10000);
+  leds.set_ctl(OFF);
+  leds.ctl_LED();
+  delay(10000);
 }

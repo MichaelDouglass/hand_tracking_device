@@ -28,6 +28,9 @@ class LEDS
 
     void blink_LED()
     {
+      if (this->ctl == OFF)
+        return;
+
       for ( int i=1; i++; i<10)
       {
         digitalWrite(this->pin1, HIGH);
@@ -48,10 +51,15 @@ class LEDS
       blink_LED();
     };
 
-    void set_ctl( bool new_ctl )
+    void set_state( int new_ctl )
     {
       this->ctl = new_ctl;
       return;
+    };
+
+    int get_state()
+    {
+      return this->ctl;
     };
 
 };

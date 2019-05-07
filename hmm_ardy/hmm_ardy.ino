@@ -13,6 +13,7 @@ LedsUI leds(3);
 Hand hand(2.0);
 
 int hand_state;
+float thresh;
 
 void setup()
 {
@@ -31,6 +32,9 @@ void setup()
   delay(1000);
 
   bno.setExtCrystalUse(true);
+
+  thresh = thresh_tester();
+  hand.set_thresh(thresh);
 }
 
 // For Testing the LED cpp and h
@@ -49,12 +53,12 @@ void loop()
 */
 
 // For Testing the Hand cpp and h
-/*
-void loop()
+float thresh_tester()
 {
+  leds.dash(); leds.dot(); leds.dot();
   float run_avg = 0;
-  int count = 0;
-  for (int i; i++; i<20)
+  float count = 0;
+  for (int i = 0; i<20; i++)
   {
     run_avg = run_avg + hand.get_Vb1();
     Serial.print(hand.get_Vb1());
@@ -65,12 +69,34 @@ void loop()
     count = count + 1;
     delay(500);
   }
-float final_avg = run_avg / count;
-Serial.print("The Average Voltage is: ");
-Serial.println(final_avg);
-delay(3000);
+  float final_avg = run_avg / count;
+  Serial.print("The Average Voltage is: ");
+  Serial.println(final_avg);
+  leds.dot(); leds.dot();
+  return final_avg;
 }
-*/
+
+void loop()
+{
+  Serial.print(hand.get_Vb1());
+  Serial.print(" / ");
+  Serial.print(hand.get_thresh());
+  Serial.print(" || ");
+  Serial.print(hand.get_state());
+  Serial.print(" ::: ");
+  
+  sensors_event_t event;
+  bno.getEvent(&event);
+
+  Serial.print("X: ");
+  Serial.print(event.orientation.x, 4);
+  Serial.print("\tY: ");
+  Serial.print(event.orientation.y, 4);
+  Serial.print("\tZ: ");
+  Serial.print(event.orientation.z, 4);
+  Serial.println("");
+  delay(500);
+}
 
 // For Testing the Hand cpp and h
 /*

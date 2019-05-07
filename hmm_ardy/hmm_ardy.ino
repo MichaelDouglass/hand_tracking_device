@@ -78,24 +78,35 @@ float thresh_tester()
 
 void loop()
 {
-  Serial.print(hand.get_Vb1());
-  Serial.print(" / ");
-  Serial.print(hand.get_thresh());
-  Serial.print(" || ");
-  Serial.print(hand.get_state());
-  Serial.print(" ::: ");
-  
-  sensors_event_t event;
-  bno.getEvent(&event);
+  if ( hand.get_state() == 0 )
+  {
+    Serial.print(hand.get_Vb1());
+    Serial.print(" | ");
+    Serial.print(hand.get_Vb2());
+    Serial.print(" | ");
+    Serial.print(hand.get_Vb3());
+    Serial.print(" / ");
+    Serial.print(hand.get_thresh());
+    Serial.print(" || ");
+    Serial.print(hand.get_state());
+    Serial.print(" ::: ");
 
-  Serial.print("X: ");
-  Serial.print(event.orientation.x, 4);
-  Serial.print("\tY: ");
-  Serial.print(event.orientation.y, 4);
-  Serial.print("\tZ: ");
-  Serial.print(event.orientation.z, 4);
-  Serial.println("");
-  delay(500);
+    sensors_event_t event;
+    bno.getEvent(&event);
+
+    Serial.print("X: ");
+    Serial.print(int(event.orientation.x));
+    Serial.print("\tY: ");
+    Serial.print(int(event.orientation.y));
+    Serial.print("\tZ: ");
+    Serial.print(int(event.orientation.z));
+    Serial.print(" || ");
+    Serial.println(millis());
+  }
+  else
+  {
+    delay(500);
+  }
 }
 
 // For Testing the Hand cpp and h

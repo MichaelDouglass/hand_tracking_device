@@ -1,6 +1,7 @@
 #include "LedsUI.h"
 #include "Hand.h"
 
+#include <SD.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -12,8 +13,13 @@ LedsUI leds(3);
 
 Hand hand(2.0);
 
-int hand_state;
 float thresh;
+
+int x;
+int y;
+int z;
+
+File myFile;
 
 void setup()
 {
@@ -24,9 +30,13 @@ void setup()
   Serial.begin(9600);
   if(!bno.begin())
   {
-    /* There was a problem detecting the BNO055 ... check your connections */
-    Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1){ leds.dash(); };
+  }
+
+  pinMode(10, OUTPUT);
+
+  if (!SD.begin(10)) {
+   while(1){ leds.dash(); };
   }
 
   delay(1000);
@@ -37,71 +47,32 @@ void setup()
   hand.set_thresh(thresh);
 }
 
-// For Testing the LED cpp and h
-/*
-void loop()
-{
-  leds.dot();
-  leds.dash();
-  leds.dot();
-  leds.dash();
-  leds.dot();
-  leds.dot();
-  leds.dot();
-  delay(3000);
-}
-*/
-
-// For Testing the Hand cpp and h
-float thresh_tester()
-{
-  leds.dash(); leds.dot(); leds.dot();
-  float run_avg = 0;
-  float count = 0;
-  for (int i = 0; i<20; i++)
-  {
-    run_avg = run_avg + hand.get_Vb1();
-    Serial.print(hand.get_Vb1());
-    Serial.print(" / ");
-    Serial.print(hand.get_thresh());
-    Serial.print(" || ");
-    Serial.println(hand.get_state());
-    count = count + 1;
-    delay(500);
-  }
-  float final_avg = run_avg / count;
-  Serial.print("The Average Voltage is: ");
-  Serial.println(final_avg);
-  leds.dot(); leds.dot();
-  return final_avg;
-}
-
 void loop()
 {
   if ( hand.get_state() == 0 )
   {
-    Serial.print(hand.get_Vb1());
-    Serial.print(" | ");
-    Serial.print(hand.get_Vb2());
-    Serial.print(" | ");
-    Serial.print(hand.get_Vb3());
-    Serial.print(" / ");
-    Serial.print(hand.get_thresh());
-    Serial.print(" || ");
-    Serial.print(hand.get_state());
-    Serial.print(" ::: ");
-
+    myFile = SD.open("bend.txt", FILE_WRITE);
     sensors_event_t event;
     bno.getEvent(&event);
-
-    Serial.print("X: ");
-    Serial.print(int(event.orientation.x));
-    Serial.print("\tY: ");
-    Serial.print(int(event.orientation.y));
-    Serial.print("\tZ: ");
-    Serial.print(int(event.orientation.z));
-    Serial.print(" || ");
-    Serial.println(millis());
+    x = int(event.orientation.x);
+    y = int(event.orientation.y);
+    z = int(event.orientation.z);
+    if (myFile)
+    {
+      myFile.print(x);
+      myFile.print("\t");
+      myFile.print(y);
+      myFile.print("\t");
+      myFile.print(z);
+      myFile.print("\t");
+      myFile.println(millis());
+      myFile.close();
+    }
+    else
+    {
+      leds.dot(); leds.dot(); leds.dot();
+      leds.dot(); leds.dot(); leds.dot();
+    }
   }
   else
   {
@@ -109,34 +80,18 @@ void loop()
   }
 }
 
-// For Testing the Hand cpp and h
-/*
-void loop()
+float thresh_tester()
 {
-  Serial.print(hand.get_Vb1());
-  Serial.print(" / ");
-  Serial.print(hand.get_thresh());
-  Serial.print(" || ");
-  Serial.println(hand.get_state());
-  delay(200);
+  leds.dash(); leds.dot(); leds.dot(); leds.dash();
+  float run_avg = 0;
+  float count = 0;
+  for (int i = 0; i<20; i++)
+  {
+    run_avg = run_avg + hand.get_Vb1();
+    count = count + 1;
+    delay(500);
+  }
+  float final_avg = run_avg / count;
+  leds.dot(); leds.dot();
+  return final_avg - 0.1;
 }
-*/
-
-// Test the x, y, z Orientation
-/*
-void loop()
-{
-  sensors_event_t event;
-  bno.getEvent(&event);
-
-  Serial.print("X: ");
-  Serial.print(event.orientation.x, 4);
-  Serial.print("\tY: ");
-  Serial.print(event.orientation.y, 4);
-  Serial.print("\tZ: ");
-  Serial.print(event.orientation.z, 4);
-  Serial.println("");
-
-  delay(100);
-}
-*/
